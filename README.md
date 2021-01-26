@@ -8,7 +8,7 @@
 
 ## Начало использования
 Чтобы начать использовать скрипты положите файл *scripts.py* в корневую папку электронного журнала (вашего сайта). Запустите shell импортируйте скрипты с помощью команды
-```
+```python
 import scripts
 from scripts import fix_marks
 from scripts import remove_chastisements
@@ -16,11 +16,18 @@ from scripts import create_commendation
 ```
 Следуйте дальнейшим указаниям.
 
+>Обратите внимание. Если вы копируете функцию из файла в shell и запускаете ее там, не забудьте импортировать необходимые модели и библиотеки
+```python
+from datacenter.models import Mark, Schoolkid, Chastisement, Lesson, Commendation
+from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
+import random
+```
+
 ## Функция fix_marks
 Принимает в качестве единственного аргумента учетную запись ученика и исправляет все оценки (2 или 3) на заданную вами оценку (4 или 5)
 
 **Пример использования**
-```
+```python
 fix_marks(schoolkid)
 ```
 
@@ -28,7 +35,7 @@ fix_marks(schoolkid)
 Также принимает на вход учетную запись ученика и удаляет все его замечения из журнала.
 
 **Пример использования**
-```
+```python
 remove_chastisements(schoolkid)
 ```
 
@@ -39,7 +46,7 @@ remove_chastisements(schoolkid)
 - subject_title - название предмета
 
 **Пример использования**
-```
+```python
 create_commendation('Алексей', 'Математика')
 ```
 
