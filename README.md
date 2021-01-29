@@ -9,10 +9,7 @@
 ## Начало использования
 Чтобы начать использовать скрипты положите файл *scripts.py* в корневую папку электронного журнала (вашего сайта). Запустите shell импортируйте скрипты с помощью команды
 ```python
-import scripts
-from scripts import fix_marks
-from scripts import remove_chastisements
-from scripts import create_commendation
+from scripts import fix_marks, remove_chastisements, create_commendation
 ```
 Следуйте дальнейшим указаниям.
 
