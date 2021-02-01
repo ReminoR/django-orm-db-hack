@@ -1,22 +1,44 @@
-from datacenter.models import Mark, Schoolkid, Chastisement, Lesson, Commendation
-from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 import random
 
+from datacenter.models import Mark
+from datacenter.models import Schoolkid
+from datacenter.models import Chastisement
+from datacenter.models import Lesson
+from datacenter.models import Commendation
+from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 
-def fix_marks(schoolkid):
-    bad_marks = Mark.objects.filter(schoolkid=schoolkid, points__in=[2,3])
-    desired_evaluations = input('У вас ' + str(bad_marks.count()) + ' плохих оценок. На какую оценку вы хотели бы их исправить?\r\n')
-    if desired_evaluations == '4' or desired_evaluations == '5':
-        Mark.objects.filter(schoolkid=schoolkid, points__in=[2,3]).update(points=desired_evaluations)
-        return 'Поздравляем, вы успешно исправили все плохие оценки. Учитесь хорошо!'
+
+def fix_marks(schoolkid, desired_evaluations):
+    try:
+        Mark.objects.filter(schoolkid=schoolkid,
+                            points__in=[2, 3]).get()
+    except ObjectDoesNotExist:
+        return 'Поздравляем! У вас нет ни одной плохой оценки!'
+    except MultipleObjectsReturned:
+        Mark.objects.filter(schoolkid=schoolkid,
+                            points__in=[2, 3])
+
+    if desired_evaluations == 4 or desired_evaluations == 5:
+        Mark.objects.filter(
+            schoolkid=schoolkid,
+            points__in=[2, 3]).update(points=desired_evaluations)
+
+        return 'Поздравляем, вы успешно исправили все плохие оценки.\
+                Учитесь хорошо!'
     else:
-        print('Некорректное значение. Введите желаемую оценку: 4 или 5')
+        return 'Введено неверное значение, попробуйте ввести 4 или 5'
+
 
 def remove_chastisements(schoolkid):
-    all_chistisements = Chastisement.objects.filter(schoolkid=schoolkid)
-    all_chistisements.delete()
-    return 'Все замечания успешно удалены'
-
+    try:
+        chistisements = Chastisement.objects.filter(schoolkid=schoolkid).get()
+        chistisements.delete()
+    except ObjectDoesNotExist:
+        return 'Замечания не найдены. Вы молодец!'
+    except MultipleObjectsReturned:
+        chistisements = Chastisement.objects.filter(schoolkid=schoolkid)
+        chistisements.delete()
+        return 'Все замечания успешно удалены'
 
 
 def create_commendation(full_name, subject_title):
@@ -54,21 +76,30 @@ def create_commendation(full_name, subject_title):
     ]
 
     try:
-        child = Schoolkid.objects.get(full_name__contains = full_name)
-    except ObjectDoesNotExist:
-        return 'Такого ученика нет в базе данных. Попробуйте ввести запрос по-другому'
+        child = Schoolkid.objects.get(full_name__contains=full_name)
+    except Schoolkid.DoesNotExists:
+        return 'Такого ученика нет в базе данных. \
+                Попробуйте ввести запрос по-другому'
     except MultipleObjectsReturned:
         return 'Слишком много совпадений, уточните поиск'
 
     try:
-        lessons = Lesson.objects.get(year_of_study = child.year_of_study, group_letter = child.group_letter, subject__title__contains = subject_title)
-    except ObjectDoesNotExist:
+        lesson = Lesson.objects.get(
+            year_of_study=child.year_of_study,
+            group_letter=child.group_letter,
+            subject__title__contains=subject_title)
+    except Lesson.DoesNotExist:
         return 'Такого предмета не существует. Попробуйте ввести по-другому'
     except MultipleObjectsReturned:
-        last_lesson = Lesson.objects.filter(year_of_study = child.year_of_study, group_letter = child.group_letter, subject__title__contains = subject_title).order_by('-date').first()
-        
+        lesson = Lesson.objects.filter(
+            year_of_study=child.year_of_study,
+            group_letter=child.group_letter,
+            subject__title__contains=subject_title).order_by('-date').first()
 
-    
-    Commendation.objects.create(text=random.choice(commendations), created = last_lesson.date, schoolkid = child, subject = last_lesson.subject, teacher = last_lesson.teacher)
+    Commendation.objects.create(
+        text=random.choice(commendations),
+        created=lesson.date,
+        schoolkid=child,
+        subject=lesson.subject,
+        teacher=lesson.teacher)
     return 'похвала успешно добавлена'
-
